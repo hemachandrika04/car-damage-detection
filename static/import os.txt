@@ -1,0 +1,94 @@
+import os
+import numpy as np
+from flask import Flask, render_template, request
+from keras.models import load_model
+from keras.preprocessing.image import load_img, img_to_array
+
+# Initialize Flask app
+app = Flask(__name__)
+UPLOAD_FOLDER = "static/uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Define paths for models
+MODEL_PATHS = {
+    "car_detection": "C:/Users/jalla/Downloads/Car_Damage_Detection_Models/model1.h5",
+    "damage_detection": "C:/Users/jalla/Downloads/Car_Damage_Detection_Models/Damage_Detection.h5",
+    "location_detection": "C:/Users/jalla/Downloads/Car_Damage_Detection_Models/car damage location model.h5",
+    "severity_detection": "C:/Users/jalla/Downloads/Car_Damage_Detection_Models/car casuality level model.h5"
+}
+
+# Load models
+models = {}
+for key, path in MODEL_PATHS.items():
+    if os.path.exists(path):
+        models[key] = load_model(path)
+    else:
+        models[key] = None
+
+# Function to preprocess images
+def preprocess_image(img_path, target_size):
+    img = load_img(img_path, target_size=target_size)
+    img_array = img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0) / 255.0
+    return img_array
+
+# Prediction functions
+def is_car(img_path):
+    model = models["car_detection"]
+    if model is None:
+        return False
+    img_array = preprocess_image(img_path, model.input_shape[1:3])
+    prediction = model.predict(img_array)
+    return prediction[0][0] >= 0.5
+
+def is_damaged(img_path):
+    model = models["damage_detection"]
+    if model is None:
+        return False
+    img_array = preprocess_image(img_path, model.input_shape[1:3])
+    prediction = model.predict(img_array)
+    return np.argmax(prediction) == 0
+
+def get_damage_location(img_path):
+    model = models["location_detection"]
+    if model is None:
+        return None
+    img_array = preprocess_image(img_path, model.input_shape[1:3])
+    prediction = model.predict(img_array)
+    return {0: 'Front', 1: 'Rear', 2: 'Side'}.get(np.argmax(prediction), "Unknown")
+
+def get_damage_severity(img_path):
+    model = models["severity_detection"]
+    if model is None:
+        return None
+    img_array = preprocess_image(img_path, model.input_shape[1:3])
+    prediction = model.predict(img_array)
+    return {0: 'Minor', 1: 'Moderate', 2: 'Severe'}.get(np.argmax(prediction), "Unknown")
+
+# Route for uploading and analyzing image
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return "No file uploaded"
+        file = request.files['file']
+        if file.filename == '':
+            return "No selected file"
+        img_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(img_path)
+        
+        if not is_car(img_path):
+            return render_template('index.html', img_path=img_path, message="This is not a car.")
+        
+        if not is_damaged(img_path):
+            return render_template('index.html', img_path=img_path, message="The car is not damaged.")
+        
+        location = get_damage_location(img_path)
+        severity = get_damage_severity(img_path)
+        return render_template('index.html', img_path=img_path, location=location, severity=severity)
+    
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)

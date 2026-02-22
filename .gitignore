@@ -1,0 +1,7 @@
+Car_Damage_Detection_Models/
+*.h5
+*.pt
+*.pth
+uploaded_image.jpg
+__pycache__/
+*.pyc

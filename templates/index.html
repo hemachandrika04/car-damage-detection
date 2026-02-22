@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static\style.css">
+    <title>Car Damage Detection</title>
+    <style>
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        img {
+            max-width: 500px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Car Damage Detection</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Upload and Analyze</button>
+    </form>
+
+    {% if results %}
+        <h2>Analysis Results:</h2>
+        <table>
+            <tr>
+                <th>Attribute</th>
+                <th>Result</th>
+            </tr>
+            <tr>
+                <td>Car Detected</td>
+                <td>{{ results.car }}</td>
+            </tr>
+            <tr>
+                <td>Damaged</td>
+                <td>{{ results.damaged }}</td>
+            </tr>
+            <tr>
+                <td>Severity</td>
+                <td>{{ results.severity }}</td>
+            </tr>
+            <tr>
+                <td>Location</td>
+                <td>{{ results.location }}</td>
+            </tr>
+        </table>
+    {% endif %}
+
+    {% if image_url %}
+        <h2>Uploaded Image:</h2>
+        <img src="{{ image_url }}" alt="Uploaded Image">
+    {% endif %}
+</body>
+</html>
