@@ -48,15 +48,26 @@ Git & GitHub
 
 📂 Project Structure
 Car_Damage_Detection/
+Car_Damage_Detection/
 │
 ├── app.py
+├── README.md
+├── .gitignore
+│
 ├── templates/
 │   ├── index.html
 │   └── result.html
+│
 ├── static/
-├── Car_Damage_Detection_Models/   (Not included in GitHub)
-├── .gitignore
-└── README.md
+│   ├── css/
+│   ├── images/
+│   └── uploads/
+│
+└── Car_Damage_Detection_Models/   (Not included in GitHub)
+    ├── Damage_Detection.h5
+    ├── car_damage_location_model.h5
+    ├── car_casualty_level_model.h5
+    └── other_model_files.h5
 ⚙️ Installation Guide
 1️⃣ Clone the Repository
 git clone https://github.com/hemachandrika04/car-damage-detection.git
@@ -121,10 +132,5 @@ Add insurance cost estimation feature
 
 Add database for storing damage history
 
-👩‍💻 Author
 
-Hema Chandrika
-GitHub: https://github.com/hemachandrika04
-
-⭐ If you found this project useful, consider giving it a star!
 
